@@ -1,0 +1,155 @@
+Function word(SNum As String)
+'Declare the Variables
+Dim zDPInt As Integer
+Dim zArrPlace As Variant
+Dim zRStr_Paise As String
+Dim zNumStr As String
+Dim zP As Integer
+Dim zTemp As String
+Dim zStrTemp As String
+Dim zRStr As String
+Dim zBp As Integer
+zArrPlace = Array("", "", " Thousand ", " Lakh ", " Crores ", " Trillion ", "", "", "", "")
+On Error Resume Next
+If SNum = "" Then
+  word = ""
+  Exit Function
+End If
+zNumStr = Trim(Str(SNum))
+If zNumStr = "" Then
+  word = ""
+  Exit Function
+End If
+ 
+zRStr = ""
+zBp = 0
+If (zNumStr > 999999999.99) Then
+    word = "Digit excced Maximum limit"
+    Exit Function
+End If
+zDPInt = InStr(zNumStr, ".")
+If zDPInt > 0 Then
+    If (Len(zNumStr) - zDPInt) = 1 Then
+       zRStr_Paise = word_GetT(Left(Mid(zNumStr, zDPInt + 1) & "0", 2))
+    ElseIf (Len(xNumStr) - xDPInt) > 1 Then
+       zRStr_Paise = word_GetT(Left(Mid(zNumStr, zDPInt + 1), 2))
+    End If
+        zNumStr = Trim(Left(zNumStr, zDPInt - 1))
+    End If
+    zP = 1
+    Do While zNumStr <> ""
+        If (zP >= 2) Then
+            zTemp = Right(zNumStr, 2)
+        Else
+            If (Len(zNumStr) = 2) Then
+                zTemp = Right(zNumStr, 2)
+            ElseIf (Len(zNumStr) = 1) Then
+                zTemp = Right(zNumStr, 1)
+            Else
+                zTemp = Right(zNumStr, 3)
+            End If
+        End If
+        zStrTemp = ""
+        If Val(zTemp) > 99 Then
+            zStrTemp = word_GetH(Right(zTemp, 3), zBp)
+            If Right(Trim(xStrTemp), 3) <> "Lac" Then
+            zBp = zBp + 1
+            End If
+        ElseIf Val(zTemp) <= 99 And Val(zTemp) > 9 Then
+            zStrTemp = word_GetT(Right(zTemp, 2))
+        ElseIf Val(zTemp) < 10 Then
+            zStrTemp = word_GetD(Right(zTemp, 2))
+        End If
+        If zStrTemp <> "" Then
+            zRStr = zStrTemp & zArrPlace(zP) & zRStr
+        End If
+        If zP = 2 Then
+            If Len(zNumStr) = 1 Then
+                zNumStr = ""
+            Else
+                zNumStr = Left(zNumStr, Len(zNumStr) - 2)
+            End If
+       ElseIf zP = 3 Then
+            If Len(zNumStr) >= 3 Then
+                 zNumStr = Left(zNumStr, Len(zNumStr) - 2)
+            Else
+                zNumStr = ""
+            End If
+        ElseIf zP = 4 Then
+          zNumStr = ""
+    Else
+        If Len(zNumStr) <= 2 Then
+        zNumStr = ""
+    Else
+        zNumStr = Left(zNumStr, Len(zNumStr) - 3)
+        End If
+    End If
+        zP = zP + 1
+Loop
+    If zRStr = "" Then
+       zRStr = "No Rupees"
+    Else
+       zRStr = " INR " & zRStr
+    End If
+    If zRStr_Paise <> "" Then
+       zRStr_Paise = " and " & zRStr_Paise & " Paise"
+    End If
+    word = zRStr & zRStr_Paise & " Only"
+    End Function
+Function word_GetH(zStrH As String, zBp As Integer)
+Dim zRStr As String
+If Val(zStrH) < 1 Then
+    word_GetH = ""
+    Exit Function
+    'Converts a Number from 100 to 999 into Word
+Else
+   zStrH = Right("000" & zStrH, 3)
+   If Mid(zStrH, 1, 1) <> "0" Then
+        If (zBp > 0) Then
+         zRStr = word_GetD(Mid(zStrH, 1, 1)) & " Lac "
+        Else
+         zRStr = word_GetD(Mid(zStrH, 1, 1)) & " Hundred "
+        End If
+    End If
+    If Mid(zStrH, 2, 1) <> "0" Then
+        zRStr = zRStr & word_GetT(Mid(zStrH, 2))
+    Else
+        zRStr = zRStr & word_GetD(Mid(zStrH, 3))
+    End If
+End If
+    word_GetH = zRStr
+End Function
+Function word_GetT(zTStr As String)
+    Dim zTArr1 As Variant
+    Dim zTArr2 As Variant
+    Dim zRStr As String
+    'Converts a Number from 10 to 19 into Word
+    
+    zTArr1 = Array("Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen")
+    'Converts a Number from 20 to 99 into Word
+    
+    zTArr2 = Array("", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety")
+    Result = ""
+    If Val(Left(zTStr, 1)) = 1 Then
+        zRStr = zTArr1(Val(Mid(zTStr, 2, 1)))
+    Else
+        If Val(Left(zTStr, 1)) > 0 Then
+            zRStr = zTArr2(Val(Left(zTStr, 1)) - 1)
+        End If
+        zRStr = zRStr & word_GetD(Right(zTStr, 1))
+    End If
+      word_GetT = zRStr
+End Function
+Function word_GetD(zDStr As String)
+Dim zArr_1() As Variant
+'Converts a Number from 1 to 9 into Word
+
+    zArr_1 = Array(" One", " Two", " Three", " Four", " Five", " Six", " Seven", " Eight", " Nine", "")
+    If Val(zDStr) > 0 Then
+        word_GetD = zArr_1(Val(zDStr) - 1)
+    Else
+        word_GetD = ""
+    End If
+End Function
+
+
